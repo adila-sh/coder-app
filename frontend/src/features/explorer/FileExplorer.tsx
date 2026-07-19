@@ -1,7 +1,9 @@
 import { SymbolIcon } from "@/components/SymbolIcon";
+import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { useConfigs } from "@/hooks/useConfigs";
+import { useWorkspaceConfig } from "@/hooks/useWorkspaceConfig";
 import { sortEntries } from "./sortEntries";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
@@ -10,6 +12,8 @@ import {
   ChevronRight,
   ClipboardPaste,
   Clock,
+  Eye,
+  EyeOff,
   FilePlus2,
   FolderPlus,
   Pencil,
@@ -90,6 +94,14 @@ const useExplorer = () => useContext(ExplorerContext)!;
 
 const BOOKMARKS_KEY = "adila:bookmarks";
 
+// Pastas/arquivos sempre escondidos (não aparecem nem com toggle ativo).
+// `.adila` guarda settings/bookmarks/etc. — o sistema lê, mas o usuário
+// não precisa ver no explorer.
+const ALWAYS_HIDDEN_NAMES = new Set([".adila"]);
+
+// Default estável pra useWorkspaceConfig (evita loop ~100Hz por nova ref).
+const EMPTY_HIDDEN: string[] = [];
+
 // ── CreateInput ───────────────────────────────────────────────────────────────
 
 interface CreateInputProps {
@@ -143,6 +155,7 @@ interface FileRowProps {
   expanded: boolean;
   loadingChildren: boolean;
   isDropTarget: boolean;
+  dimmed: boolean;
 }
 
 const FileRow = memo(function FileRow({
@@ -154,6 +167,7 @@ const FileRow = memo(function FileRow({
   expanded,
   loadingChildren,
   isDropTarget,
+  dimmed,
 }: FileRowProps) {
   const ctx = useExplorer();
   const renameRef = useRef<HTMLInputElement>(null);
@@ -180,6 +194,7 @@ const FileRow = memo(function FileRow({
         "group flex items-center gap-2 hover:bg-accent/60 text-sm py-1.5 cursor-pointer rounded select-none transition-colors h-full",
         isRenaming && "bg-accent",
         isDropTarget && "bg-primary/10 ring-1 ring-inset ring-primary/40",
+        dimmed && "opacity-50",
       )}
       style={{ paddingLeft: `${depth * 14 + 4}px` }}
       draggable={!entry.isDir && !isRenaming}
@@ -233,7 +248,7 @@ const FileRow = memo(function FileRow({
       )}
 
       {isBookmarked && !ctx.ultraFast && (
-        <Star className="size-3.5 shrink-0 fill-amber-400/80 text-amber-400/80" />
+        <Star className="size-3 shrink-0 mr-1.5 fill-current text-foreground/30" />
       )}
       {loadingChildren && <Spinner size="xs" className="shrink-0 text-muted-foreground" />}
     </div>
@@ -243,7 +258,7 @@ const FileRow = memo(function FileRow({
 // ── Tree flattening ──────────────────────────────────────────────────────────
 
 type FlatRow =
-  | { kind: "entry"; entry: FileEntry; depth: number }
+  | { kind: "entry"; entry: FileEntry; depth: number; dimmed: boolean }
   | { kind: "create"; depth: number };
 
 function flattenTree(
@@ -255,6 +270,8 @@ function flattenTree(
   createParentPath: string | null,
   createActive: boolean,
   rootPath: string,
+  hiddenPaths: Set<string>,
+  showHidden: boolean,
 ): FlatRow[] {
   const out: FlatRow[] = [];
 
@@ -262,10 +279,15 @@ function flattenTree(
     out.push({ kind: "create", depth: 0 });
   }
 
+  const isHidden = (entry: FileEntry) =>
+    ALWAYS_HIDDEN_NAMES.has(entry.name) || hiddenPaths.has(entry.path);
+
   const visit = (entries: FileEntry[], depth: number) => {
     const sorted = sortEntries(entries, sort, recentPaths);
     for (const entry of sorted) {
-      out.push({ kind: "entry", entry, depth });
+      const hidden = isHidden(entry);
+      if (hidden && !showHidden) continue;
+      out.push({ kind: "entry", entry, depth, dimmed: hidden });
       if (entry.isDir && expanded.has(entry.path)) {
         if (createActive && createParentPath === entry.path) {
           out.push({ kind: "create", depth: depth + 1 });
@@ -395,6 +417,8 @@ interface ContextMenuPopupProps {
   onDelete: () => void;
   onBookmark: () => void;
   isBookmarked: boolean;
+  onToggleHide: () => void;
+  isHidden: boolean;
   onNewFile?: () => void;
   onNewFolder?: () => void;
   onPaste?: () => void;
@@ -402,7 +426,18 @@ interface ContextMenuPopupProps {
 
 const ContextMenuPopup = forwardRef<HTMLDivElement, ContextMenuPopupProps>(
   (
-    { state, onRename, onDelete, onBookmark, isBookmarked, onNewFile, onNewFolder, onPaste },
+    {
+      state,
+      onRename,
+      onDelete,
+      onBookmark,
+      isBookmarked,
+      onToggleHide,
+      isHidden,
+      onNewFile,
+      onNewFolder,
+      onPaste,
+    },
     ref,
   ) => {
     const item =
@@ -454,6 +489,19 @@ const ContextMenuPopup = forwardRef<HTMLDivElement, ContextMenuPopupProps>(
             </>
           )}
         </button>
+        <button type="button" className={item} onClick={onToggleHide}>
+          {isHidden ? (
+            <>
+              <Eye className="size-3.5 shrink-0" />
+              Mostrar
+            </>
+          ) : (
+            <>
+              <EyeOff className="size-3.5 shrink-0" />
+              Esconder
+            </>
+          )}
+        </button>
         <div className="my-1 border-t border-border/40" />
         <button type="button" className={cn(item, "text-destructive")} onClick={onDelete}>
           <Trash2 className="size-3.5 shrink-0" />
@@ -492,6 +540,21 @@ export function FileExplorer({
   const sort = explorerCfg["explorer.sortOrder"];
   const confirmDelete = explorerCfg["explorer.confirmDelete"];
   const ultraFast = explorerCfg["performance.ultraFast"];
+  const { value: hiddenPathsList, set: setHiddenPathsList } = useWorkspaceConfig<string[]>(
+    "explorer.hiddenPaths",
+    EMPTY_HIDDEN,
+  );
+  const hiddenPaths = useMemo(() => new Set(hiddenPathsList), [hiddenPathsList]);
+  const [showHidden, setShowHidden] = useState(false);
+  const toggleHide = useCallback(
+    (path: string) => {
+      const next = hiddenPaths.has(path)
+        ? hiddenPathsList.filter((p) => p !== path)
+        : [...hiddenPathsList, path];
+      void setHiddenPathsList(next);
+    },
+    [hiddenPaths, hiddenPathsList, setHiddenPathsList],
+  );
   const setSort = useCallback(
     (v: SortMode) => setExplorerCfg("explorer.sortOrder", v),
     [setExplorerCfg],
@@ -839,6 +902,8 @@ export function FileExplorer({
         createParentPath,
         createMode !== null,
         rootPath,
+        hiddenPaths,
+        showHidden,
       ),
     [
       rootEntries,
@@ -849,6 +914,8 @@ export function FileExplorer({
       createParentPath,
       createMode,
       rootPath,
+      hiddenPaths,
+      showHidden,
     ],
   );
 
@@ -912,27 +979,31 @@ export function FileExplorer({
     <ExplorerContext.Provider value={ctx}>
       <div className="flex h-full flex-col overflow-hidden">
         {/* Toolbar */}
-        <div className="flex items-center gap-0.5 border-b px-1.5 py-1 shrink-0">
-          <Search className="size-3.5 shrink-0 text-muted-foreground/50 ml-0.5" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar…"
-            className="flex-1 min-w-0 bg-transparent px-1.5 py-0.5 text-xs outline-none placeholder:text-muted-foreground/40"
-          />
-          {search && (
-            <button
-              type="button"
-              onClick={() => setSearch("")}
-              className="rounded p-0.5 text-muted-foreground/60 hover:text-foreground"
-            >
-              <X className="size-3" />
-            </button>
-          )}
+        <div className="flex items-center gap-1 border-b px-1.5 py-1 shrink-0">
+          <div className="relative flex-1 min-w-0">
+            <Search className="pointer-events-none absolute left-1.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/50" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar…"
+              aria-label="Buscar arquivos"
+              className="h-7 text-xs pl-6 pr-6"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                aria-label="Limpar busca"
+                className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground/60 hover:text-foreground hover:bg-accent"
+              >
+                <X className="size-3" />
+              </button>
+            )}
+          </div>
           <div className="h-4 w-px bg-border/60 mx-0.5" />
           <button
             type="button"
-            title="Novo arquivo (na pasta raiz)"
+            title="Novo arquivo"
             onClick={() => rootPath && startCreate("file", rootPath)}
             disabled={!rootPath}
             className="rounded p-1 text-muted-foreground hover:text-foreground hover:bg-accent disabled:opacity-30"
@@ -941,7 +1012,7 @@ export function FileExplorer({
           </button>
           <button
             type="button"
-            title="Nova pasta (na pasta raiz)"
+            title="Nova pasta"
             onClick={() => rootPath && startCreate("dir", rootPath)}
             disabled={!rootPath}
             className="rounded p-1 text-muted-foreground hover:text-foreground hover:bg-accent disabled:opacity-30"
@@ -955,6 +1026,17 @@ export function FileExplorer({
             className="rounded p-1 text-muted-foreground hover:text-foreground hover:bg-accent"
           >
             <SortIcon className="size-3.5" />
+          </button>
+          <button
+            type="button"
+            title={showHidden ? "Esconder arquivos ocultos" : "Mostrar arquivos ocultos"}
+            onClick={() => setShowHidden((v) => !v)}
+            className={cn(
+              "rounded p-1 hover:bg-accent",
+              showHidden ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {showHidden ? <Eye className="size-3.5" /> : <EyeOff className="size-3.5" />}
           </button>
         </div>
 
@@ -1057,6 +1139,7 @@ export function FileExplorer({
                             ? dropTargetPath === row.entry.path
                             : dropTargetPath === targetDirFor(row.entry))
                         }
+                        dimmed={row.dimmed}
                       />
                     )}
                   </div>
@@ -1077,6 +1160,11 @@ export function FileExplorer({
           onDelete={() => onDelete(contextMenu.entry.path)}
           onBookmark={() => onToggleBookmark(contextMenu.entry)}
           isBookmarked={bookmarks.some((b) => b.path === contextMenu.entry.path)}
+          onToggleHide={() => {
+            toggleHide(contextMenu.entry.path);
+            setContextMenu(null);
+          }}
+          isHidden={hiddenPaths.has(contextMenu.entry.path)}
           onNewFile={
             contextMenu.entry.isDir ? () => startCreate("file", contextMenu.entry.path) : undefined
           }

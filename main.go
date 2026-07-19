@@ -31,6 +31,7 @@ func main() {
 	sp := NewSpotify(cfg)
 	linear := NewLinear(cfg)
 	tasks := NewTasks(term)
+	tests := NewTests()
 	wcfg := NewWorkspaceConfig()
 	cfg.AttachWorkspace(wcfg)
 	claude := NewClaude(cfg)
@@ -66,6 +67,7 @@ func main() {
 			application.NewService(codex),
 			application.NewService(indexer),
 			application.NewService(tasks),
+			application.NewService(tests),
 			application.NewService(bench),
 		},
 	})

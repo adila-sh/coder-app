@@ -136,9 +136,7 @@ export function CompletionPopup({
               }`}
             >
               <span className="font-mono truncate flex-1">{label}</span>
-              {kind && (
-                <span className="shrink-0 text-[10px] text-muted-foreground">{kind}</span>
-              )}
+              {kind && <span className="shrink-0 text-[10px] text-muted-foreground">{kind}</span>}
             </button>
           );
         })}

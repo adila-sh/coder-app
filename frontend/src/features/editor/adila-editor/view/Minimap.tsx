@@ -81,7 +81,8 @@ function MinimapInner({
   // mapeamento usa usedHeight (altura real ocupada por código), não
   // minimapHeight.
   const idealHeight = lineCount * MINI_LH;
-  const visualLineH = idealHeight <= minimapHeight ? MINI_LH : minimapHeight / Math.max(1, lineCount);
+  const visualLineH =
+    idealHeight <= minimapHeight ? MINI_LH : minimapHeight / Math.max(1, lineCount);
   const usedHeight = Math.min(minimapHeight, lineCount * visualLineH);
   // Razão minimap-px → scroller-px. Vale tanto para overlay (scroll → top no
   // minimap) quanto para click (top no minimap → scroll).
@@ -117,14 +118,7 @@ function MinimapInner({
       if (y > minimapHeight) break;
       const text = buffer.getLine(i);
       if (text.length === 0) continue;
-      drawLine(
-        ctx,
-        text,
-        tokenCache.getLineTokens(i),
-        y,
-        Math.max(1, visualLineH * 0.85),
-        maxX,
-      );
+      drawLine(ctx, text, tokenCache.getLineTokens(i), y, Math.max(1, visualLineH * 0.85), maxX);
     }
   }, [buffer, bufferVersion, tokenCache, langId, lineCount, width, minimapHeight, visualLineH]);
 
@@ -134,7 +128,10 @@ function MinimapInner({
     const el = overlayRef.current;
     if (!el) return;
     const top = minimapToScroller > 0 ? scrollTop / minimapToScroller : 0;
-    const h = Math.max(20, minimapToScroller > 0 ? viewportHeight / minimapToScroller : viewportHeight);
+    const h = Math.max(
+      20,
+      minimapToScroller > 0 ? viewportHeight / minimapToScroller : viewportHeight,
+    );
     el.style.transform = `translateY(${top}px)`;
     el.style.height = `${h}px`;
   }, [scrollTop, viewportHeight, minimapToScroller]);

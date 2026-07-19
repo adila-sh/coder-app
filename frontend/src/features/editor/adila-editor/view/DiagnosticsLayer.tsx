@@ -39,8 +39,7 @@ function DiagnosticsLayerInner({
 
     for (let line = firstLine; line <= lastLine; line++) {
       const sCol = line === startLine ? d.range.start.character : 0;
-      const eCol =
-        line === endLine ? d.range.end.character : Math.max(sCol + 1, sCol + 80);
+      const eCol = line === endLine ? d.range.end.character : Math.max(sCol + 1, sCol + 80);
       const start = layout.positionToPoint({ line, col: sCol });
       const end = layout.positionToPoint({ line, col: eCol });
       const width = Math.max(charWidth, (end.x - start.x) * charWidth);

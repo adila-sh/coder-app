@@ -132,7 +132,11 @@ describe("tokenize — uma linha", () => {
     tokenizeLine(`const s = "${"a".repeat(200)}";`, "typescript", INITIAL_STATE);
   });
   bench("typescript — comentário", () => {
-    tokenizeLine(`// just a regular line comment with words and numbers 42`, "typescript", INITIAL_STATE);
+    tokenizeLine(
+      `// just a regular line comment with words and numbers 42`,
+      "typescript",
+      INITIAL_STATE,
+    );
   });
 });
 
@@ -140,12 +144,22 @@ describe("tokenize — arquivo inteiro (cold cache)", () => {
   bench("1k linhas", () => {
     const buf = new LineBuffer(SRC_1K);
     const cache = new TokenizerCache();
-    cache.tokenizeUpTo((i) => buf.getLine(i), buf.getLineCount(), buf.getLineCount() - 1, "typescript");
+    cache.tokenizeUpTo(
+      (i) => buf.getLine(i),
+      buf.getLineCount(),
+      buf.getLineCount() - 1,
+      "typescript",
+    );
   });
   bench("10k linhas", () => {
     const buf = new LineBuffer(SRC_10K);
     const cache = new TokenizerCache();
-    cache.tokenizeUpTo((i) => buf.getLine(i), buf.getLineCount(), buf.getLineCount() - 1, "typescript");
+    cache.tokenizeUpTo(
+      (i) => buf.getLine(i),
+      buf.getLineCount(),
+      buf.getLineCount() - 1,
+      "typescript",
+    );
   });
 });
 
@@ -153,7 +167,12 @@ describe("tokenize — viewport quente (cache hit)", () => {
   // Simula scroll: cache já populado, só pede linhas visíveis novamente.
   const buf = new LineBuffer(SRC_10K);
   const cache = new TokenizerCache();
-  cache.tokenizeUpTo((i) => buf.getLine(i), buf.getLineCount(), buf.getLineCount() - 1, "typescript");
+  cache.tokenizeUpTo(
+    (i) => buf.getLine(i),
+    buf.getLineCount(),
+    buf.getLineCount() - 1,
+    "typescript",
+  );
   bench("10k linhas — 50 linhas visíveis", () => {
     cache.tokenizeUpTo((i) => buf.getLine(i), buf.getLineCount(), 50, "typescript");
   });

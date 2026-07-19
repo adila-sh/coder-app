@@ -139,10 +139,7 @@ export function EditorView({
     Math.ceil(visibleBottom / lineHeight) + OVERSCAN,
   );
   const firstVisible = Math.max(0, layout.visualLineToLogicalLine(firstVisualRow));
-  const lastVisible = Math.min(
-    lineCount - 1,
-    layout.visualLineToLogicalLine(lastVisualRow),
-  );
+  const lastVisible = Math.min(lineCount - 1, layout.visualLineToLogicalLine(lastVisualRow));
 
   tokenCache.tokenizeUpTo((i) => buffer.getLine(i), lineCount, lastVisible, langId);
 
@@ -360,14 +357,15 @@ export function EditorView({
     const ops = editsFromCompletion(target, fallbackRange);
     if (ops.length === 0) return;
     const primaryOp =
-      ops.find((op) => op.range.start.line === fallbackRange.start.line && op.range.start.col === fallbackRange.start.col) ??
-      ops[0];
+      ops.find(
+        (op) =>
+          op.range.start.line === fallbackRange.start.line &&
+          op.range.start.col === fallbackRange.start.col,
+      ) ?? ops[0];
     const finalPos = finalPositionAfterEdit(primaryOp);
-    store.getState().edit(
-      ops,
-      [{ pos: finalPos, anchor: finalPos, desiredCol: finalPos.col }],
-      "completion",
-    );
+    store
+      .getState()
+      .edit(ops, [{ pos: finalPos, anchor: finalPos, desiredCol: finalPos.col }], "completion");
     setCompletionState(null);
   }
 
@@ -408,10 +406,12 @@ export function EditorView({
     if (!lspApi?.available || !pos) return;
     const range = primary && !posOverride ? cursorRange(primary) : { start: pos, end: pos };
     const relatedDiagnostics =
-      diagnostics?.filter((d) => rangesOverlap(range, {
-        start: { line: d.range.start.line, col: d.range.start.character },
-        end: { line: d.range.end.line, col: d.range.end.character },
-      })) ?? [];
+      diagnostics?.filter((d) =>
+        rangesOverlap(range, {
+          start: { line: d.range.start.line, col: d.range.start.character },
+          end: { line: d.range.end.line, col: d.range.end.character },
+        }),
+      ) ?? [];
     const actions = await lspApi.codeActions(toLspRange(range), relatedDiagnostics);
     if (actions.length === 0) return;
     const el = scrollerRef.current;
@@ -433,11 +433,13 @@ export function EditorView({
       const ops = editsFromWorkspaceEdit(edit, lspApi?.uri);
       if (ops.length > 0) {
         const primaryAfter = ops[0].range.start;
-        store.getState().edit(
-          ops,
-          [{ pos: primaryAfter, anchor: primaryAfter, desiredCol: primaryAfter.col }],
-          "code-action",
-        );
+        store
+          .getState()
+          .edit(
+            ops,
+            [{ pos: primaryAfter, anchor: primaryAfter, desiredCol: primaryAfter.col }],
+            "code-action",
+          );
         applied = true;
       }
     }
@@ -513,10 +515,7 @@ export function EditorView({
 
     if (e.altKey) {
       // Alt+click: adiciona cursor.
-      store.getState().setCursors([
-        ...cursors,
-        makeCursor(pos),
-      ]);
+      store.getState().setCursors([...cursors, makeCursor(pos)]);
       return;
     }
 
@@ -557,11 +556,13 @@ export function EditorView({
     } else if (drag.mode === "word") {
       const r = wordRangeAt(buffer, pos);
       const useStart = posCmp(pos, drag.anchor) < 0;
-      store.getState().setCursors([
-        useStart
-          ? { pos: r.start, anchor: drag.anchor, desiredCol: r.start.col }
-          : { pos: r.end, anchor: drag.anchor, desiredCol: r.end.col },
-      ]);
+      store
+        .getState()
+        .setCursors([
+          useStart
+            ? { pos: r.start, anchor: drag.anchor, desiredCol: r.start.col }
+            : { pos: r.end, anchor: drag.anchor, desiredCol: r.end.col },
+        ]);
     } else if (drag.mode === "line") {
       const useStart = posCmp(pos, drag.anchor) < 0;
       const target: Position = useStart
@@ -873,7 +874,11 @@ export function EditorView({
       const next = s.cursors.map((c, i) => {
         const r = cursorRange(c);
         const newCol = r.start.col + lines[i].length;
-        return { pos: { line: r.start.line, col: newCol }, anchor: { line: r.start.line, col: newCol }, desiredCol: newCol };
+        return {
+          pos: { line: r.start.line, col: newCol },
+          anchor: { line: r.start.line, col: newCol },
+          desiredCol: newCol,
+        };
       });
       s.edit(ops, next, "paste-multi");
       return;
@@ -914,7 +919,9 @@ export function EditorView({
   }
 
   // Linha atual destacada.
-  const currentLineTop = primary ? PADDING_TOP + positionToVisualPoint(layout, primary.pos).top : -9999;
+  const currentLineTop = primary
+    ? PADDING_TOP + positionToVisualPoint(layout, primary.pos).top
+    : -9999;
 
   // Gutter rows (line numbers).
   const gutterRows: React.ReactNode[] = [];
@@ -924,11 +931,12 @@ export function EditorView({
       const height =
         ((layout.lineStarts[i + 1] ?? layout.lineStarts[i] ?? 0) - (layout.lineStarts[i] ?? 0)) *
         lineHeight;
-      const num = relativeLineNumbers && primary
-        ? i === primary.pos.line
-          ? i + 1
-          : Math.abs(i - primary.pos.line)
-        : i + 1;
+      const num =
+        relativeLineNumbers && primary
+          ? i === primary.pos.line
+            ? i + 1
+            : Math.abs(i - primary.pos.line)
+          : i + 1;
       const isCurrent = primary && i === primary.pos.line;
       gutterRows.push(
         <div
@@ -1157,7 +1165,10 @@ export function EditorView({
   );
 }
 
-function rangesOverlap(a: { start: Position; end: Position }, b: { start: Position; end: Position }) {
+function rangesOverlap(
+  a: { start: Position; end: Position },
+  b: { start: Position; end: Position },
+) {
   return posCmp(a.start, b.end) <= 0 && posCmp(b.start, a.end) <= 0;
 }
 
@@ -1172,8 +1183,7 @@ function touchedLines(s: ReturnType<EditorStore["getState"]>): number[] {
   const lines = new Set<number>();
   for (const c of s.cursors) {
     const r = cursorRange(c);
-    const endLine =
-      r.end.col === 0 && r.end.line > r.start.line ? r.end.line - 1 : r.end.line;
+    const endLine = r.end.col === 0 && r.end.line > r.start.line ? r.end.line - 1 : r.end.line;
     for (let line = r.start.line; line <= endLine; line++) lines.add(line);
   }
   return Array.from(lines).sort((a, b) => a - b);
@@ -1257,11 +1267,22 @@ function insertTextWithPairs(s: ReturnType<EditorStore["getState"]>, text: strin
     s.insertText(text);
     return;
   }
-  const pairs: Record<string, string> = { "(": ")", "[": "]", "{": "}", '"': '"', "'": "'", "`": "`" };
+  const pairs: Record<string, string> = {
+    "(": ")",
+    "[": "]",
+    "{": "}",
+    '"': '"',
+    "'": "'",
+    "`": "`",
+  };
   const closing = new Set(Object.values(pairs));
   const close = pairs[text];
   const c = s.cursors[0];
-  if (closing.has(text) && !cursorHasSelection(c) && s.buffer.getLine(c.pos.line)[c.pos.col] === text) {
+  if (
+    closing.has(text) &&
+    !cursorHasSelection(c) &&
+    s.buffer.getLine(c.pos.line)[c.pos.col] === text
+  ) {
     const pos = { line: c.pos.line, col: c.pos.col + 1 };
     s.setCursors([{ pos, anchor: pos, desiredCol: pos.col }]);
     return;
@@ -1291,7 +1312,11 @@ function insertTextWithPairs(s: ReturnType<EditorStore["getState"]>, text: strin
     return;
   }
   const pos = { line: c.pos.line, col: c.pos.col + 1 };
-  s.edit([{ range: cursorRange(c), text: text + close }], [{ pos, anchor: pos, desiredCol: pos.col }], "pair");
+  s.edit(
+    [{ range: cursorRange(c), text: text + close }],
+    [{ pos, anchor: pos, desiredCol: pos.col }],
+    "pair",
+  );
 }
 
 function lineRangeForLine(s: ReturnType<EditorStore["getState"]>, line: number) {
@@ -1308,7 +1333,11 @@ function deleteSelectedLines(s: ReturnType<EditorStore["getState"]>) {
   const ranges = lines.map((line) => lineRangeForLine(s, line));
   const targetLine = Math.max(0, Math.min(lines[0], s.buffer.getLineCount() - lines.length - 1));
   const pos = { line: targetLine, col: 0 };
-  s.edit(ranges.map((range) => ({ range, text: "" })), [{ pos, anchor: pos, desiredCol: 0 }], "delete-lines");
+  s.edit(
+    ranges.map((range) => ({ range, text: "" })),
+    [{ pos, anchor: pos, desiredCol: 0 }],
+    "delete-lines",
+  );
 }
 
 function copySelectedLines(s: ReturnType<EditorStore["getState"]>, dir: 1 | -1) {
@@ -1344,25 +1373,32 @@ function moveSelectedLines(s: ReturnType<EditorStore["getState"]>, dir: 1 | -1) 
   const block = lines.map((line) => s.buffer.getLine(line)).join("\n");
   if (dir < 0) {
     const above = s.buffer.getLine(first - 1);
-    const range = { start: { line: first - 1, col: 0 }, end: { line: last, col: s.buffer.getLineLength(last) } };
+    const range = {
+      start: { line: first - 1, col: 0 },
+      end: { line: last, col: s.buffer.getLineLength(last) },
+    };
     const text = block + "\n" + above;
     const pos = { line: Math.max(0, s.cursors[0].pos.line - 1), col: s.cursors[0].pos.col };
     s.edit([{ range, text }], [{ pos, anchor: pos, desiredCol: pos.col }], "move-lines");
     return;
   }
   const below = s.buffer.getLine(last + 1);
-  const range = { start: { line: first, col: 0 }, end: { line: last + 1, col: s.buffer.getLineLength(last + 1) } };
+  const range = {
+    start: { line: first, col: 0 },
+    end: { line: last + 1, col: s.buffer.getLineLength(last + 1) },
+  };
   const text = below + "\n" + block;
-  const pos = { line: Math.min(lineCount - 1, s.cursors[0].pos.line + 1), col: s.cursors[0].pos.col };
+  const pos = {
+    line: Math.min(lineCount - 1, s.cursors[0].pos.line + 1),
+    col: s.cursors[0].pos.col,
+  };
   s.edit([{ range, text }], [{ pos, anchor: pos, desiredCol: pos.col }], "move-lines");
 }
 
 function addNextOccurrence(s: ReturnType<EditorStore["getState"]>) {
   const buf = s.buffer;
   const last = s.cursors[s.cursors.length - 1];
-  const range = cursorHasSelection(last)
-    ? cursorRange(last)
-    : wordRangeAt(buf, last.pos);
+  const range = cursorHasSelection(last) ? cursorRange(last) : wordRangeAt(buf, last.pos);
   if (range.start.line !== range.end.line) return; // V0: só palavra/seleção single-line
   const needle = buf.getRangeText(range);
   if (!needle) return;
@@ -1381,8 +1417,14 @@ function toggleLineComment(s: ReturnType<EditorStore["getState"]>) {
   const lang = s.langId;
   // Importação dinâmica seria overkill aqui — usa map local conhecido.
   const lineCommentMap: Record<string, string> = {
-    typescript: "// ", javascript: "// ", go: "// ", rust: "// ",
-    python: "# ", shell: "# ", scss: "// ", json: "// ",
+    typescript: "// ",
+    javascript: "// ",
+    go: "// ",
+    rust: "// ",
+    python: "# ",
+    shell: "# ",
+    scss: "// ",
+    json: "// ",
   };
   const prefix = lineCommentMap[lang] ?? "// ";
 

@@ -92,6 +92,18 @@ func (t *Tasks) ServiceStartup(ctx context.Context, _ application.ServiceOptions
 	return nil
 }
 
+func (t *Tests) ServiceStartup(ctx context.Context, _ application.ServiceOptions) error {
+	t.startup(ctx)
+	return nil
+}
+
+func (t *Tests) ServiceShutdown() error {
+	if t.cancel != nil {
+		t.cancel()
+	}
+	return nil
+}
+
 func (t *Terminal) ServiceStartup(ctx context.Context, _ application.ServiceOptions) error {
 	t.startup(ctx)
 	return nil

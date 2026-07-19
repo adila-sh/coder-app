@@ -27,7 +27,9 @@
 }
 
 .ade-root {
-  font-feature-settings: "calt" 1, "liga" 1;
+  font-feature-settings:
+    "calt" 1,
+    "liga" 1;
 }
 
 .ade-scroller {
@@ -100,8 +102,14 @@
 }
 
 @keyframes ade-blink {
-  0%, 50% { opacity: 1; }
-  50.01%, 100% { opacity: 0; }
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
 }
 
 .ade-input {
@@ -113,24 +121,65 @@
 }
 
 /* Token classes — cores literais HSL pra independência do tema. */
-.tk-plain      { color: var(--ade-fg); }
-.tk-keyword    { color: hsl(285 65% 70%); font-weight: 500; }
-.tk-string     { color: hsl(140 55% 60%); }
-.tk-number     { color: hsl(30 85% 65%); }
-.tk-comment    { color: hsl(120 25% 55%); font-style: italic; }
-.tk-operator   { color: var(--muted-foreground); }
-.tk-punctuation { color: var(--muted-foreground); }
-.tk-variable   { color: var(--ade-fg); }
-.tk-function   { color: hsl(210 85% 70%); }
-.tk-type       { color: hsl(175 60% 60%); }
-.tk-constant   { color: hsl(20 80% 65%); font-weight: 500; }
-.tk-tag        { color: hsl(0 75% 68%); font-weight: 500; }
-.tk-attribute  { color: hsl(45 80% 65%); }
-.tk-namespace  { color: hsl(45 70% 65%); }
-.tk-parameter  { color: hsl(15 70% 70%); font-style: italic; }
-.tk-property   { color: hsl(195 70% 70%); }
-.tk-decorator  { color: hsl(50 80% 65%); }
-.tk-regexp     { color: hsl(0 70% 65%); }
+.tk-plain {
+  color: var(--ade-fg);
+}
+.tk-keyword {
+  color: hsl(285 65% 70%);
+  font-weight: 500;
+}
+.tk-string {
+  color: hsl(140 55% 60%);
+}
+.tk-number {
+  color: hsl(30 85% 65%);
+}
+.tk-comment {
+  color: hsl(120 25% 55%);
+  font-style: italic;
+}
+.tk-operator {
+  color: var(--muted-foreground);
+}
+.tk-punctuation {
+  color: var(--muted-foreground);
+}
+.tk-variable {
+  color: var(--ade-fg);
+}
+.tk-function {
+  color: hsl(210 85% 70%);
+}
+.tk-type {
+  color: hsl(175 60% 60%);
+}
+.tk-constant {
+  color: hsl(20 80% 65%);
+  font-weight: 500;
+}
+.tk-tag {
+  color: hsl(0 75% 68%);
+  font-weight: 500;
+}
+.tk-attribute {
+  color: hsl(45 80% 65%);
+}
+.tk-namespace {
+  color: hsl(45 70% 65%);
+}
+.tk-parameter {
+  color: hsl(15 70% 70%);
+  font-style: italic;
+}
+.tk-property {
+  color: hsl(195 70% 70%);
+}
+.tk-decorator {
+  color: hsl(50 80% 65%);
+}
+.tk-regexp {
+  color: hsl(0 70% 65%);
+}
 
 /* Find panel */
 .ade-find-panel {

@@ -6,6 +6,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { SpotifyView } from "@/features/spotify/SpotifyView";
+import { ActionsView } from "@/features/github-actions/ActionsView";
+import { TestsView } from "@/features/tests/TestsView";
+import { TasksView } from "@/features/tasks/TasksView";
 import { PaneTree, type DraggedFile } from "@/features/editor/PaneTree";
 import { ProblemsPanel, type EditorMarker } from "@/features/editor/ProblemsPanel";
 import { isWebviewPath, webviewPathFromUrl } from "@/features/editor/WebView";
@@ -57,6 +60,7 @@ import {
 import { SetWorkdir as cmdSetWorkdir } from "../wailsjs/go/main/CommandCenter";
 import { SetWorkdir as wcfgSetWorkdir } from "../wailsjs/go/main/WorkspaceConfig";
 import { SetWorkdir as indexerSetWorkdir } from "../wailsjs/go/main/Indexer";
+import { SetWorkdir as testsSetWorkdir } from "../wailsjs/go/main/Tests";
 import { tasksRpc } from "@/features/tasks/rpc";
 import { EventsEmit, EventsOn } from "../wailsjs/runtime/runtime";
 
@@ -122,6 +126,9 @@ type View =
   | "notifications"
   | "githubProfile"
   | "spotify"
+  | "actions"
+  | "tests"
+  | "tasks"
   | "linear";
 type BottomPanel = "terminal" | "problems" | "diff";
 
@@ -399,6 +406,7 @@ function App() {
       gitRpc.git.setWorkdir(path);
       void cmdSetWorkdir(path);
       void tasksRpc.setWorkdir(path);
+      void testsSetWorkdir(path);
       void wcfgSetWorkdir(path);
       void indexerSetWorkdir(path);
       const entries = await ListDir(path);
@@ -914,7 +922,7 @@ function App() {
     setDiffLoading(true);
     gitRpc.git
       .diff(activePath, false)
-      .then((p) => setDiffPatch(p as string))
+      .then((p: unknown) => setDiffPatch(p as string))
       .catch(() => setDiffPatch(null))
       .finally(() => setDiffLoading(false));
   }, [bottomPanel, activePath]);
@@ -1035,7 +1043,6 @@ function App() {
     () => setBottomPanel((p) => (p === "terminal" ? null : "terminal")),
     [],
   );
-  const showTerminalPanel = useCallback(() => setBottomPanel("terminal"), []);
   const onOpenPalette = useCallback(() => useUiStore.getState().openPalette("> "), []);
   const onToggleZen = useCallback(() => void setZenMode(!zenModeRef.current), [setZenMode]);
   const onCloseFocusedTab = useCallback(() => {
@@ -1052,6 +1059,9 @@ function App() {
       onOpenGit={() => setView("git")}
       onOpenOnboarding={() => setView("onboarding")}
       onOpenSpotify={() => setView("spotify")}
+      onOpenActions={() => setView("actions")}
+      onOpenTests={() => setView("tests")}
+      onOpenTasks={() => setView("tasks")}
       recentFolders={recentFolders}
       onOpenRecentFolder={(path) => openFolder(path)}
       onRemoveRecentFolder={removeRecentFolder}
@@ -1144,7 +1154,6 @@ function App() {
             files={filesProps}
             onOpenFile={stableOpenFile}
             onGotoLine={onGotoLine}
-            onShowTerminal={showTerminalPanel}
           />
         </DevProfiler>
       </aside>
@@ -1331,6 +1340,17 @@ function App() {
         )}
       </Dialog>
       <SpotifyView overlayOpen={view === "spotify"} onClose={() => setView("editor")} />
+      <ActionsView overlayOpen={view === "actions"} onClose={() => setView("editor")} />
+      <TestsView
+        overlayOpen={view === "tests"}
+        onClose={() => setView("editor")}
+        rootPath={rootPath}
+      />
+      <TasksView
+        overlayOpen={view === "tasks"}
+        onClose={() => setView("editor")}
+        rootPath={rootPath}
+      />
       <Suspense fallback={null}>
         <GitHubProfileView
           overlayOpen={view === "githubProfile"}

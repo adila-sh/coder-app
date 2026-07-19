@@ -89,7 +89,11 @@ export function AdilaEditor({
       const buf = store.getState().buffer;
       const lc = Math.max(0, Math.min(line, buf.getLineCount() - 1));
       const cc = Math.max(0, Math.min(col, buf.getLineLength(lc)));
-      store.getState().setCursors([{ pos: { line: lc, col: cc }, anchor: { line: lc, col: cc }, desiredCol: cc }]);
+      store
+        .getState()
+        .setCursors([
+          { pos: { line: lc, col: cc }, anchor: { line: lc, col: cc }, desiredCol: cc },
+        ]);
     });
   }, [store]);
 

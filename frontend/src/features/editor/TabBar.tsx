@@ -157,10 +157,7 @@ export const TabBar = memo(function TabBar({
               <span className="size-4 shrink-0 relative z-10 flex items-center justify-center">
                 {isWeb ? (
                   <Globe
-                    className={cn(
-                      "size-4",
-                      active ? "text-foreground" : "text-muted-foreground",
-                    )}
+                    className={cn("size-4", active ? "text-foreground" : "text-muted-foreground")}
                   />
                 ) : (
                   <SymbolIcon name={name} isDir={false} className="size-4" />

@@ -20,7 +20,8 @@ export type LineState = {
 export const INITIAL_STATE: LineState = { ctx: 0 };
 
 const IDENT_RE = /[A-Za-z_$][A-Za-z0-9_$]*/y;
-const NUMBER_RE = /(?:0[xX][0-9a-fA-F_]+|0[bB][01_]+|0[oO][0-7_]+|\d[\d_]*(?:\.\d[\d_]*)?(?:[eE][+-]?\d+)?)n?/y;
+const NUMBER_RE =
+  /(?:0[xX][0-9a-fA-F_]+|0[bB][01_]+|0[oO][0-7_]+|\d[\d_]*(?:\.\d[\d_]*)?(?:[eE][+-]?\d+)?)n?/y;
 const WS_RE = /\s+/y;
 
 export function tokenizeLine(
@@ -184,17 +185,14 @@ export function tokenizeLine(
       //    o que este identificador é.
       else if (prevKeyword && lang.variableDeclKw?.has(prevKeyword) && immPrev !== ".") {
         type = "variable";
-      }
-      else if (prevKeyword && lang.functionDeclKw?.has(prevKeyword) && immPrev !== ".") {
+      } else if (prevKeyword && lang.functionDeclKw?.has(prevKeyword) && immPrev !== ".") {
         // `func foo` → foo é function
         // mas em Go: `func (r *Receiver) Method()` — o ident depois de `func`
         // pode ser `(` (receiver). Tratado pelo immPrev: se for `(` ou `*`, vira plain/type.
         type = "function";
-      }
-      else if (prevKeyword && lang.typeDeclKw?.has(prevKeyword) && immPrev !== ".") {
+      } else if (prevKeyword && lang.typeDeclKw?.has(prevKeyword) && immPrev !== ".") {
         type = "type";
-      }
-      else if (prevKeyword && lang.namespaceKw?.has(prevKeyword)) {
+      } else if (prevKeyword && lang.namespaceKw?.has(prevKeyword)) {
         type = "namespace";
       }
       // 3. Member access: x.y → y vira property/function.
@@ -204,8 +202,7 @@ export function tokenizeLine(
       // 4. Heurística de capital case: PascalCase → type, UPPER_SNAKE → constant.
       else if (lang.upperSnakeIsConstant && /^[A-Z][A-Z0-9_]*$/.test(word) && word.length > 1) {
         type = "constant";
-      }
-      else if (lang.pascalCaseIsType && /^[A-Z]/.test(word) && followChar !== "(") {
+      } else if (lang.pascalCaseIsType && /^[A-Z]/.test(word) && followChar !== "(") {
         type = "type";
       }
       // 5. Function call.

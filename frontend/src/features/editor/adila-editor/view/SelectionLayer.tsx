@@ -97,10 +97,16 @@ function SelectionLayerInner({
 
   return (
     <>
-      <div className="ade-selection-layer" style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 1 }}>
+      <div
+        className="ade-selection-layer"
+        style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 1 }}
+      >
         {rects}
       </div>
-      <div className="ade-caret-layer" style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 3 }}>
+      <div
+        className="ade-caret-layer"
+        style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 3 }}
+      >
         {carets}
       </div>
     </>

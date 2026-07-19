@@ -53,10 +53,7 @@ export function HoverPopup({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <div
-        className="ade-hover-markdown"
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      <div className="ade-hover-markdown" dangerouslySetInnerHTML={{ __html: html }} />
     </div>
   );
 }

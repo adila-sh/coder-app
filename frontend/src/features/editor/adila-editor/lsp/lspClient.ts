@@ -308,7 +308,9 @@ export class AdilaLSPClient {
           context: { diagnostics },
         } satisfies proto.CodeActionParams,
       );
-      return (resp ?? []).filter((item): item is proto.CodeAction => "title" in item && ("edit" in item || "kind" in item));
+      return (resp ?? []).filter(
+        (item): item is proto.CodeAction => "title" in item && ("edit" in item || "kind" in item),
+      );
     } catch (err) {
       this.onError(`Erro em code actions (${this.lang})`, err);
       return [];

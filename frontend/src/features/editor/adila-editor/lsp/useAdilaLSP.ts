@@ -15,7 +15,10 @@ export type LspApi = {
     character: number,
   ) => Promise<proto.Location[] | proto.LocationLink[] | null>;
   resolveCodeAction: (action: proto.CodeAction) => Promise<proto.CodeAction>;
-  codeActions: (range: proto.Range, diagnostics?: proto.Diagnostic[]) => Promise<proto.CodeAction[]>;
+  codeActions: (
+    range: proto.Range,
+    diagnostics?: proto.Diagnostic[],
+  ) => Promise<proto.CodeAction[]>;
   formatDocument: (options: proto.FormattingOptions) => Promise<proto.TextEdit[]>;
   formatRange: (range: proto.Range, options: proto.FormattingOptions) => Promise<proto.TextEdit[]>;
   executeCommand: (command: proto.Command) => Promise<void>;

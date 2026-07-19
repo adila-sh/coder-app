@@ -16,9 +16,7 @@ import { isWebviewPath } from "./WebView";
 import type { DropSide, LeafPane, PaneId, PaneNode } from "./panes";
 
 const CodeEditor = lazy(() => import("./CodeEditor").then((m) => ({ default: m.CodeEditor })));
-const AdilaEditor = lazy(() =>
-  import("./adila-editor").then((m) => ({ default: m.AdilaEditor })),
-);
+const AdilaEditor = lazy(() => import("./adila-editor").then((m) => ({ default: m.AdilaEditor })));
 const WebView = lazy(() => import("./WebView").then((m) => ({ default: m.WebView })));
 
 export const FILE_DRAG_MIME = "application/x-adila-file";

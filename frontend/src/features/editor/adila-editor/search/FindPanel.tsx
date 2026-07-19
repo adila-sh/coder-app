@@ -112,10 +112,20 @@ export function FindPanel({ store, open, onClose }: Props) {
         >
           .*
         </button>
-        <button type="button" className="ade-find-btn" onClick={() => state.findPrev()} title="Anterior">
+        <button
+          type="button"
+          className="ade-find-btn"
+          onClick={() => state.findPrev()}
+          title="Anterior"
+        >
           ↑
         </button>
-        <button type="button" className="ade-find-btn" onClick={() => state.findNext()} title="Próximo">
+        <button
+          type="button"
+          className="ade-find-btn"
+          onClick={() => state.findNext()}
+          title="Próximo"
+        >
           ↓
         </button>
         <button type="button" className="ade-find-btn" onClick={onClose} title="Fechar">

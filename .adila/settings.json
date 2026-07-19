@@ -1,1 +1,9 @@
-{}
+{
+  "explorer.hiddenPaths": [
+    "/home/sousa/work/adila/ide/service_lifecycle.go"
+  ],
+  "tasks.favorites": [
+    "npm:build",
+    "npm:generate"
+  ]
+}

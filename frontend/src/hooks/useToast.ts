@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export type ToastVariant = "default" | "success" | "error";
+export type ToastVariant = "default" | "success" | "error" | "clipboard";
 
 export interface Toast {
   id: string;
@@ -14,6 +14,7 @@ type Listener = (toasts: Toast[]) => void;
 const listeners = new Set<Listener>();
 let state: Toast[] = [];
 const AUTO_DISMISS_MS = 4000;
+const CLIPBOARD_DISMISS_MS = 1000;
 
 function notify() {
   for (const l of listeners) {
@@ -21,13 +22,18 @@ function notify() {
   }
 }
 
-function emit(title: string, description: string | undefined, variant: ToastVariant): string {
+function emit(
+  title: string,
+  description: string | undefined,
+  variant: ToastVariant,
+  durationMs: number = AUTO_DISMISS_MS,
+): string {
   const id = Math.random().toString(36).slice(2, 10);
   state = [...state, { id, title, description, variant }];
   notify();
   setTimeout(() => {
     dismiss(id);
-  }, AUTO_DISMISS_MS);
+  }, durationMs);
   return id;
 }
 
@@ -51,8 +57,25 @@ export const toast = {
   success: (title: string, description?: string) => emit(title, description, "success"),
   error: (title: string, err?: unknown) =>
     emit(title, err === undefined ? undefined : errorMessage(err), "error"),
+  clipboard: (description?: string) =>
+    emit("Copiado para clipboard", description, "clipboard", CLIPBOARD_DISMISS_MS),
   dismiss,
 };
+
+/**
+ * Copia texto para o clipboard e exibe um toast bottom-center curto (1s).
+ * Devolve `true` se conseguiu copiar.
+ */
+export async function copyToClipboard(text: string, description?: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast.clipboard(description ?? text);
+    return true;
+  } catch (err) {
+    toast.error("Não foi possível copiar", err);
+    return false;
+  }
+}
 
 export function useToasts(): Toast[] {
   const [current, setCurrent] = useState(state);

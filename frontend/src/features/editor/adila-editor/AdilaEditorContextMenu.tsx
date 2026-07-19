@@ -3,6 +3,7 @@ import type { EditorStore } from "./state/editorStore";
 import { cursorRange, cursorHasSelection } from "./cursor/cursorState";
 import { useUiStore } from "@/stores/uiStore";
 import { EventsEmit } from "../../../../wailsjs/runtime/runtime";
+import { copyToClipboard } from "@/hooks/useToast";
 import type { LspApi } from "./lsp/useAdilaLSP";
 
 type Position = { x: number; y: number };
@@ -114,12 +115,8 @@ function buildItems(
       onSelect: async () => {
         const text = selectionText();
         if (text) {
-          try {
-            await navigator.clipboard.writeText(text);
-            deleteSelection();
-          } catch (err) {
-            console.error(err);
-          }
+          const ok = await copyToClipboard(text);
+          if (ok) deleteSelection();
         }
         close();
       },
@@ -131,13 +128,7 @@ function buildItems(
       disabled: !hasSel,
       onSelect: async () => {
         const text = selectionText();
-        if (text) {
-          try {
-            await navigator.clipboard.writeText(text);
-          } catch (err) {
-            console.error(err);
-          }
-        }
+        if (text) await copyToClipboard(text);
         close();
       },
     },
@@ -179,11 +170,7 @@ function buildItems(
       kind: "item",
       label: "Copiar caminho do arquivo",
       onSelect: async () => {
-        try {
-          await navigator.clipboard.writeText(filePath);
-        } catch (err) {
-          console.error(err);
-        }
+        await copyToClipboard(filePath, filePath);
         close();
       },
     },
@@ -192,11 +179,7 @@ function buildItems(
       label: "Copiar nome do arquivo",
       onSelect: async () => {
         const name = filePath.split(/[\\/]/).pop() ?? filePath;
-        try {
-          await navigator.clipboard.writeText(name);
-        } catch (err) {
-          console.error(err);
-        }
+        await copyToClipboard(name, name);
         close();
       },
     },

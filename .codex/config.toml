@@ -1,0 +1,4 @@
+# Full autonomy for trusted Adila repositories.
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+web_search = "live"

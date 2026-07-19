@@ -19,9 +19,7 @@ export function posMax(a: Position, b: Position): Position {
 }
 
 export function normalizeRange(r: Range): Range {
-  return posCmp(r.start, r.end) <= 0
-    ? r
-    : { start: r.end, end: r.start };
+  return posCmp(r.start, r.end) <= 0 ? r : { start: r.end, end: r.start };
 }
 
 export function rangeIsEmpty(r: Range): boolean {

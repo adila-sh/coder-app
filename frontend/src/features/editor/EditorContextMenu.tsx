@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { editor as MonacoEditor } from "monaco-editor";
+import { copyToClipboard } from "@/hooks/useToast";
 
 type Editor = MonacoEditor.IStandaloneCodeEditor;
 
@@ -137,19 +138,12 @@ function resolveItems(editor: Editor, filePath: string, close: () => void): Reso
       const onSelect =
         item.label === "Copiar caminho do arquivo"
           ? async () => {
-              try {
-                await navigator.clipboard.writeText(filePath);
-              } catch (e) {
-                console.error(e);
-              }
+              await copyToClipboard(filePath, filePath);
               close();
             }
           : async () => {
-              try {
-                await navigator.clipboard.writeText(filePath.split("/").pop() ?? filePath);
-              } catch (e) {
-                console.error(e);
-              }
+              const name = filePath.split("/").pop() ?? filePath;
+              await copyToClipboard(name, name);
               close();
             };
       resolved.push({ kind: "item", label: item.label, onSelect });

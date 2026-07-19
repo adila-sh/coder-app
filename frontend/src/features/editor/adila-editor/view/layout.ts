@@ -23,7 +23,13 @@ export type VisualLayout = {
   lines: VisualLine[];
   lineToFirstVisual: number[];
   visualLineToLogicalLine: (visualRow: number) => number;
-  positionToPoint: (pos: Position) => { x: number; y: number; visualRow: number; column: number; top: number };
+  positionToPoint: (pos: Position) => {
+    x: number;
+    y: number;
+    visualRow: number;
+    column: number;
+    top: number;
+  };
   pointToPosition: (y: number, visualColumn: number) => Position;
 };
 
@@ -180,7 +186,8 @@ export function positionFromVisualPoint(
 ): Position {
   const line = lineForVisualRow(layout, visualRow);
   const rowInLine = visualRow - (layout.lineStarts[line] ?? 0);
-  const targetCol = (layout.wrapColumn ? rowInLine * layout.wrapColumn : 0) + Math.max(0, visualCol);
+  const targetCol =
+    (layout.wrapColumn ? rowInLine * layout.wrapColumn : 0) + Math.max(0, visualCol);
   return { line, col: colFromVisualColumn(buffer.getLine(line), targetCol, tabSize) };
 }
 
@@ -189,7 +196,14 @@ export function segmentForVisualRow(
   layout: VisualLayout,
   visualRow: number,
   tabSize: number,
-): { line: number; segment: number; startCol: number; endCol: number; startVisualCol: number; endVisualCol: number } {
+): {
+  line: number;
+  segment: number;
+  startCol: number;
+  endCol: number;
+  startVisualCol: number;
+  endVisualCol: number;
+} {
   const line = lineForVisualRow(layout, visualRow);
   const segment = visualRow - (layout.lineStarts[line] ?? 0);
   if (!layout.wrapColumn) {
@@ -219,7 +233,11 @@ export function positionToVisualPoint(layout: VisualLayout, pos: Position) {
   return layout.positionToPoint(pos);
 }
 
-export function visualPointToPosition(layout: VisualLayout, y: number, visualColumn: number): Position {
+export function visualPointToPosition(
+  layout: VisualLayout,
+  y: number,
+  visualColumn: number,
+): Position {
   return layout.pointToPosition(y, visualColumn);
 }
 

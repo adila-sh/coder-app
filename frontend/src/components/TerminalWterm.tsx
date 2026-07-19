@@ -52,7 +52,9 @@ export function TerminalWterm({ sessionId, active = true, onTitle, onExit, handl
     });
 
     const unsubExit = EventsOn(`pty:exit:${sessionId}`, (code: number) => {
-      handleRefInternal.current?.write(`\r\n\x1b[90m[processo encerrado · exit ${code}]\x1b[0m\r\n`);
+      handleRefInternal.current?.write(
+        `\r\n\x1b[90m[processo encerrado · exit ${code}]\x1b[0m\r\n`,
+      );
       onExit?.(code);
     });
 

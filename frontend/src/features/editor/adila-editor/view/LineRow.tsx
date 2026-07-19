@@ -60,7 +60,7 @@ function LineRowInner({ text, tokens, startCol = 0, tabSize = 4 }: Props) {
   if (cursor < text.length) {
     out.push(
       <span key={`p${cursor}`} className="tk-plain">
-          {renderText(text.slice(cursor), cursor)}
+        {renderText(text.slice(cursor), cursor)}
       </span>,
     );
   }

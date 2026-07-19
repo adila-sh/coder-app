@@ -5,7 +5,17 @@ import { CodexProfileCard } from "@/features/codex/CodexProfileCard";
 import { GitHubProfileCard } from "@/features/git/GitHubProfileCard";
 import { LinearProfileCard } from "@/features/linear/LinearProfileCard";
 import { SpotifyProfileCard } from "@/features/spotify/SpotifyProfileCard";
-import { ChevronRight, Clock, FolderOpen, Keyboard, Settings, X } from "lucide-react";
+import {
+  Activity,
+  ChevronRight,
+  Clock,
+  FolderOpen,
+  Keyboard,
+  ListChecks,
+  Settings,
+  TestTube,
+  X,
+} from "lucide-react";
 import { motion } from "motion/react";
 import React from "react";
 
@@ -41,6 +51,9 @@ type Props = {
   onOpenGit: () => void;
   onOpenOnboarding: () => void;
   onOpenSpotify: () => void;
+  onOpenActions: () => void;
+  onOpenTests: () => void;
+  onOpenTasks: () => void;
   recentFolders?: string[];
   onOpenRecentFolder?: (path: string) => void;
   onRemoveRecentFolder?: (path: string) => void;
@@ -52,6 +65,9 @@ export function WelcomePage({
   onOpenKeybindings,
   onOpenOnboarding,
   onOpenSpotify,
+  onOpenActions,
+  onOpenTests,
+  onOpenTasks,
   recentFolders = [],
   onOpenRecentFolder,
   onRemoveRecentFolder,
@@ -147,6 +163,21 @@ export function WelcomePage({
                   icon={<Keyboard className="size-4" />}
                   label="Atalhos de teclado"
                   onClick={onOpenKeybindings}
+                />
+                <ActionRow
+                  icon={<Activity className="size-4" />}
+                  label="GitHub Actions"
+                  onClick={onOpenActions}
+                />
+                <ActionRow
+                  icon={<TestTube className="size-4" />}
+                  label="Testes"
+                  onClick={onOpenTests}
+                />
+                <ActionRow
+                  icon={<ListChecks className="size-4" />}
+                  label="Tasks"
+                  onClick={onOpenTasks}
                 />
               </div>
             </motion.section>

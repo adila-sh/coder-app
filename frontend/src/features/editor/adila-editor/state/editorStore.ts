@@ -69,11 +69,7 @@ export type EditorActions = {
   getValue: () => string;
   setCursors: (cursors: Cursor[]) => void;
   setScroll: (top: number, left: number) => void;
-  edit: (
-    op: { range: Range; text: string }[],
-    nextCursors: Cursor[],
-    groupKey?: string,
-  ) => void;
+  edit: (op: { range: Range; text: string }[], nextCursors: Cursor[], groupKey?: string) => void;
   insertText: (text: string) => void;
   deleteSelectionOrChar: (direction: "back" | "forward") => void;
   undo: () => void;
@@ -81,7 +77,9 @@ export type EditorActions = {
   // Find
   setFindQuery: (q: string) => void;
   setFindReplacement: (q: string) => void;
-  setFindOptions: (opts: Partial<Pick<EditorState, "findCaseSensitive" | "findWholeWord" | "findRegex">>) => void;
+  setFindOptions: (
+    opts: Partial<Pick<EditorState, "findCaseSensitive" | "findWholeWord" | "findRegex">>,
+  ) => void;
   computeFindMatches: () => void;
   findNext: () => void;
   findPrev: () => void;
@@ -135,11 +133,7 @@ export function createEditorStore(initialText: string, langId: string): EditorSt
       return { applied: sorted, inverses };
     }
 
-    function applyEdit(
-      ops: EditOp[],
-      nextCursors: Cursor[],
-      groupKey?: string,
-    ) {
+    function applyEdit(ops: EditOp[], nextCursors: Cursor[], groupKey?: string) {
       const beforeCursors = get().cursors.map((c) => ({ ...c }));
       const { applied, inverses } = applyNewOps(ops);
       const afterCursors = nextCursors.map((c) => ({ ...c }));
@@ -275,7 +269,11 @@ export function createEditorStore(initialText: string, langId: string): EditorSt
           if (cursorHasSelection(c)) {
             const range = cursorRange(c);
             ops.push({ range, text: "" });
-            nextCursors.push({ pos: range.start, anchor: range.start, desiredCol: range.start.col });
+            nextCursors.push({
+              pos: range.start,
+              anchor: range.start,
+              desiredCol: range.start.col,
+            });
             continue;
           }
           const p = c.pos;

@@ -1,5 +1,5 @@
 import { lazy, memo, Suspense, useCallback, useState } from "react";
-import { Activity, Bot, Files, GitBranch, ListChecks, Search } from "lucide-react";
+import { Bot, Files, GitBranch, Search } from "lucide-react";
 import { DevProfiler } from "@/components/DevProfiler";
 import {
   FileExplorer,
@@ -12,39 +12,24 @@ const GitView = lazy(() => import("@/features/git/GitView").then((m) => ({ defau
 const ChatPanel = lazy(() =>
   import("@/features/ai/ChatPanel").then((m) => ({ default: m.ChatPanel })),
 );
-const TasksView = lazy(() =>
-  import("@/features/tasks/TasksView").then((m) => ({ default: m.TasksView })),
-);
-const ActionsView = lazy(() =>
-  import("@/features/github-actions/ActionsView").then((m) => ({ default: m.ActionsView })),
-);
 
-type Tab = "files" | "search" | "git" | "actions" | "tasks" | "ai";
+type Tab = "files" | "search" | "git" | "ai";
 
 type Props = {
   rootPath: string;
   files: FileExplorerProps;
   onOpenFile: (entry: FileEntry) => void;
   onGotoLine?: (path: string, line: number, column: number) => void;
-  onShowTerminal?: () => void;
 };
 
 const TABS: { id: Tab; label: string; Icon: typeof Files }[] = [
   { id: "files", label: "Arquivos", Icon: Files },
   { id: "search", label: "Buscar", Icon: Search },
   { id: "git", label: "Source Control", Icon: GitBranch },
-  { id: "actions", label: "GitHub Actions", Icon: Activity },
-  { id: "tasks", label: "Tasks", Icon: ListChecks },
   { id: "ai", label: "Adila AI", Icon: Bot },
 ];
 
-export const Sidebar = memo(function Sidebar({
-  rootPath,
-  files,
-  onOpenFile,
-  onGotoLine,
-  onShowTerminal,
-}: Props) {
+export const Sidebar = memo(function Sidebar({ rootPath, files, onOpenFile, onGotoLine }: Props) {
   const [tab, setTab] = useState<Tab>("files");
 
   const onOpenMatch = useCallback(
@@ -94,16 +79,6 @@ export const Sidebar = memo(function Sidebar({
         {tab === "git" && (
           <Suspense fallback={<SidebarFallback />}>
             <GitView compact rootPath={rootPath} onOpenFile={onOpenGitFile} />
-          </Suspense>
-        )}
-        {tab === "actions" && (
-          <Suspense fallback={<SidebarFallback />}>
-            <ActionsView />
-          </Suspense>
-        )}
-        {tab === "tasks" && (
-          <Suspense fallback={<SidebarFallback />}>
-            <TasksView rootPath={rootPath} onShowTerminal={onShowTerminal} />
           </Suspense>
         )}
         {tab === "ai" && (
